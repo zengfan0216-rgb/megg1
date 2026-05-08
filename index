@@ -1,0 +1,699 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Records Demo</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #242326;
+  --muted: #96979d;
+  --soft: #fff7fa;
+  --card: #ffffff;
+  --line: #f0edf0;
+  --rose: #f39499;
+  --rose-deep: #6e2d3f;
+  --rose-faint: #fdeced;
+  --chrome: #e8e0e2;
+}
+body {
+  min-height: 100vh;
+  overflow: hidden;
+  background: #efefef;
+  color: var(--ink);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  display: flex;
+}
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background: #fff;
+  border-right: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+.sidebar-header h2 {
+  font-size: 15px;
+  font-weight: 750;
+}
+.sidebar-header p {
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+}
+.sidebar-list {
+  padding: 10px;
+  overflow-y: auto;
+}
+.sidebar-group-title {
+  padding: 10px 10px 6px;
+  color: #999;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+}
+.sidebar-item:hover { background: #f7f7f7; }
+.sidebar-item.active {
+  background: #fdebed;
+  color: #b65a61;
+  font-weight: 650;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rose);
+  flex: 0 0 auto;
+}
+.phone-area {
+  flex: 0 0 430px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  border-radius: 40px;
+  overflow: hidden;
+  background: var(--soft);
+  box-shadow: 0 22px 60px rgba(0,0,0,.16), 0 0 0 1px rgba(0,0,0,.04);
+  position: relative;
+}
+.prd-area {
+  flex: 1;
+  height: 100vh;
+  min-width: 320px;
+  background: #fff;
+  border-left: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+}
+.prd-header {
+  padding: 20px;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5e5;
+}
+.prd-header h3 {
+  font-size: 15px;
+  font-weight: 750;
+}
+.prd-path {
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+}
+.prd-content {
+  padding: 22px;
+  overflow-y: auto;
+  color: #3a3a3a;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.prd-content h4 {
+  margin: 18px 0 8px;
+  color: #222;
+  font-size: 14px;
+}
+.prd-content ul { padding-left: 18px; }
+.prd-content li { margin-bottom: 8px; }
+.status-bar {
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 34px 9px;
+  font-size: 15px;
+  font-weight: 800;
+}
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.signal {
+  width: 22px;
+  height: 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+.signal span {
+  width: 4px;
+  border-radius: 2px;
+  background: #000;
+}
+.signal span:nth-child(1) { height: 6px; }
+.signal span:nth-child(2) { height: 9px; }
+.signal span:nth-child(3) { height: 12px; }
+.signal span:nth-child(4) { height: 14px; }
+.wifi {
+  width: 22px;
+  height: 15px;
+  position: relative;
+}
+.wifi:before, .wifi:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 3px solid #000;
+  border-color: #000 transparent transparent transparent;
+  border-radius: 50%;
+}
+.wifi:before { width: 22px; height: 22px; top: 0; }
+.wifi:after { width: 12px; height: 12px; top: 6px; }
+.battery {
+  width: 27px;
+  height: 13px;
+  border: 2px solid #111;
+  border-radius: 4px;
+  position: relative;
+}
+.battery:before {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 3px;
+  width: 2px;
+  height: 5px;
+  border-radius: 2px;
+  background: #111;
+}
+.battery:after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 18px;
+  height: 5px;
+  border-radius: 2px;
+  background: #111;
+}
+.screen {
+  height: calc(100% - 54px);
+  overflow-y: auto;
+  padding: 0 16px 30px;
+  scrollbar-width: none;
+}
+.screen::-webkit-scrollbar { display: none; }
+.nav {
+  height: 104px;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+}
+.back {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  position: relative;
+}
+.back:before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 7px;
+  width: 17px;
+  height: 17px;
+  border-left: 3px solid #242326;
+  border-bottom: 3px solid #242326;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.nav-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 760;
+  letter-spacing: .01em;
+}
+.period-tabs {
+  height: 79px;
+  border-radius: 22px;
+  background: rgba(221, 211, 214, .78);
+  box-shadow: inset 0 1px 8px rgba(88, 59, 67, .05);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 2px;
+  margin-bottom: 38px;
+}
+.period-tab {
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  color: #8d8e94;
+  font-size: 22px;
+  font-weight: 430;
+  cursor: pointer;
+}
+.period-tab.active {
+  color: #222;
+  background: #fff;
+  font-weight: 760;
+  box-shadow: 0 2px 7px rgba(34, 21, 25, .08);
+}
+.chart-card,
+.list-card {
+  background: var(--card);
+  border-radius: 22px;
+}
+.chart-card {
+  padding: 30px 32px 27px;
+  margin-bottom: 32px;
+}
+.chart-head {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.chart-title {
+  text-align: center;
+  font-size: 25px;
+  font-weight: 650;
+}
+.chart-arrow {
+  width: 28px;
+  height: 28px;
+  position: relative;
+}
+.chart-arrow:before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 4px;
+  border-radius: 2px;
+}
+.chart-arrow.left:before {
+  left: 7px;
+  border-left: 3px solid #252529;
+  border-bottom: 3px solid #252529;
+  transform: rotate(45deg);
+}
+.chart-arrow.right:before {
+  right: 7px;
+  border-right: 3px solid #252529;
+  border-top: 3px solid #252529;
+  transform: rotate(45deg);
+}
+.chart-arrow.disabled:before { border-color: #d4d4d8; }
+.chart-area {
+  height: 306px;
+  position: relative;
+  padding: 24px 16px 36px 0;
+}
+.axis-label {
+  position: absolute;
+  right: -2px;
+  color: #c8c8ce;
+  font-size: 18px;
+  font-weight: 420;
+}
+.axis-top { top: 0; }
+.axis-bottom { bottom: 33px; }
+.grid-line {
+  position: absolute;
+  left: 0;
+  right: 28px;
+  height: 1px;
+  background: #f3f0f1;
+}
+.grid-line:nth-child(1) { top: 28px; }
+.grid-line:nth-child(2) { top: 96px; }
+.grid-line:nth-child(3) { top: 166px; }
+.grid-line:nth-child(4) { bottom: 58px; }
+.goal-line {
+  position: absolute;
+  left: 0;
+  right: 52px;
+  top: 158px;
+  border-top: 2px dashed #ead0d0;
+}
+.bars {
+  position: absolute;
+  left: 24px;
+  right: 46px;
+  bottom: 58px;
+  height: 198px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 9px;
+}
+.bar {
+  flex: 1;
+  max-width: 16px;
+  min-width: 8px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #e5b5b2 0%, #f7eded 100%);
+}
+.bar.ghost { opacity: 0; }
+.x-axis {
+  position: absolute;
+  left: 25px;
+  right: 45px;
+  bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  color: #aaaab0;
+  font-size: 17px;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  text-align: center;
+}
+.stat-value {
+  color: var(--rose-deep);
+  font-size: 29px;
+  font-weight: 850;
+}
+.stat-value span {
+  margin-left: 5px;
+  color: #ba787f;
+  font-size: 15px;
+  font-weight: 650;
+}
+.stat-label {
+  margin-top: 4px;
+  color: #8f8f96;
+  font-size: 17px;
+  line-height: 1.2;
+}
+.list-card {
+  padding: 28px 32px 18px;
+}
+.filter-tabs {
+  display: flex;
+  gap: 29px;
+  align-items: center;
+  white-space: nowrap;
+  margin-bottom: 30px;
+  color: #b1b1b5;
+  font-size: 20px;
+}
+.filter-tab.active {
+  color: #111;
+  font-weight: 760;
+}
+.record-item {
+  display: grid;
+  grid-template-columns: 56px 1fr 86px;
+  align-items: center;
+  gap: 14px;
+  min-height: 82px;
+  margin-bottom: 20px;
+}
+.record-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--rose-faint);
+}
+.record-name {
+  min-width: 0;
+  font-size: 18px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.record-meta {
+  margin-top: 11px;
+  color: #aaaab0;
+  font-size: 16px;
+  white-space: nowrap;
+}
+.record-right {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 9px;
+  justify-self: end;
+}
+.progress {
+  width: 38px;
+  height: 4px;
+  border-radius: 4px;
+  background: #f0edf0;
+  overflow: hidden;
+}
+.progress span {
+  display: block;
+  width: 80%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--rose);
+}
+.percent {
+  color: #ff969a;
+  font-size: 17px;
+}
+.mood {
+  grid-column: 2;
+  font-size: 18px;
+}
+@media (max-width: 1100px) {
+  .prd-area { display: none; }
+  .phone-area { flex: 1; }
+}
+@media (max-width: 760px) {
+  body { display: block; overflow: auto; background: var(--soft); }
+  .sidebar, .prd-area { display: none; }
+  .phone-area { padding: 0; display: block; }
+  .phone-frame {
+    width: 100vw;
+    min-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Training Records Demo</h2>
+      <p>Week · Month · Year 记录页</p>
+    </div>
+    <div class="sidebar-list">
+      <div class="sidebar-group-title">页面状态</div>
+      <div class="sidebar-item active" data-page="week" onclick="showPage('week')"><span class="dot"></span>Week 周视图</div>
+      <div class="sidebar-item" data-page="month" onclick="showPage('month')"><span class="dot"></span>Month 月视图</div>
+      <div class="sidebar-item" data-page="year" onclick="showPage('year')"><span class="dot"></span>Year 年视图</div>
+    </div>
+  </aside>
+
+  <main class="phone-area">
+    <section class="phone-frame" id="phone"></section>
+  </main>
+
+  <aside class="prd-area">
+    <div class="prd-header">
+      <h3 id="prd-title">说明</h3>
+      <div class="prd-path" id="prd-path">Training Records / Week</div>
+    </div>
+    <div class="prd-content" id="prd-content"></div>
+  </aside>
+
+<script>
+const viewData = {
+  week: {
+    label: 'Week',
+    range: '4.6-4.17',
+    disabledRight: true,
+    x: ['4.6','4.7','4.8','4.9','4.10','4.11','4.12'],
+    bars: [116, 140, 68, 0, 0, 0, 0],
+    doc: {
+      path: 'Training Records / Week',
+      body: `
+        <h4>目标</h4>
+        <ul>
+          <li>复刻参考图中的周维度训练记录页，突出近一周柱状训练时长。</li>
+          <li>顶部使用 Week / Month / Year 分段控件，当前状态高亮。</li>
+          <li>图表卡展示日期范围、左右切换、3h 纵轴标识、虚线目标线和三项统计。</li>
+        </ul>
+        <h4>交互</h4>
+        <ul>
+          <li>点击左侧导航或手机内分段控件可切换三个视图。</li>
+          <li>记录列表保留 All、STIM、EMG Therapy、ETS、EMG Game 分类入口。</li>
+        </ul>`
+    }
+  },
+  month: {
+    label: 'Month',
+    range: 'April',
+    x: ['4.1','4.5','4.10','4.15','4.20','4.25','4.30'],
+    bars: [76, 122, 96, 138, 154, 170, 86, 132, 150, 162, 78, 104, 122, 156, 42, 132, 172, 184, 172, 190, 142, 142, 150, 164, 178, 196, 184, 196, 190, 132],
+    doc: {
+      path: 'Training Records / Month',
+      body: `
+        <h4>目标</h4>
+        <ul>
+          <li>月视图展示 April 的整月训练分布，柱状密度高于周视图。</li>
+          <li>保留同一套统计指标，方便用户在不同周期中对比训练坚持情况。</li>
+        </ul>
+        <h4>视觉</h4>
+        <ul>
+          <li>背景采用极浅粉，卡片纯白，柱状图使用粉色到浅粉渐变。</li>
+          <li>参考图中的弱对比坐标线和目标虚线已保留。</li>
+        </ul>`
+    }
+  },
+  year: {
+    label: 'Year',
+    range: '2026',
+    x: ['J','F','M','A','M','J','J','A','S','O','N','D'],
+    bars: [174, 140, 118, 150, 0, 0, 0, 0, 0, 0, 0, 0],
+    doc: {
+      path: 'Training Records / Year',
+      body: `
+        <h4>目标</h4>
+        <ul>
+          <li>年视图按月份聚合训练时长，适合快速查看全年节奏。</li>
+          <li>当前高亮 Year，图表标题为 2026。</li>
+        </ul>
+        <h4>列表</h4>
+        <ul>
+          <li>列表结构与周/月一致，展示训练模式、训练时间、完成度和心情反馈。</li>
+          <li>长模式名自动截断，避免破坏右侧完成度布局。</li>
+        </ul>`
+    }
+  }
+};
+
+const records = [
+  { name: 'Mode name', mood: false },
+  { name: 'Mode nameMode nameMode nameMode name', mood: true },
+  { name: 'Mode name', mood: true },
+  { name: 'Mode name', mood: false },
+  { name: 'Mode name', mood: true },
+  { name: 'Mode name', mood: true },
+  { name: 'Mode name', mood: false }
+];
+
+let current = 'week';
+
+function statusBar() {
+  return `<div class="status-bar">
+    <div>9:41</div>
+    <div class="status-icons">
+      <div class="signal"><span></span><span></span><span></span><span></span></div>
+      <div class="wifi"></div>
+      <div class="battery"></div>
+    </div>
+  </div>`;
+}
+
+function renderBars(data) {
+  return data.bars.map(v => `<div class="bar${v ? '' : ' ghost'}" style="height:${Math.max(v, 1)}px"></div>`).join('');
+}
+
+function renderXAxis(data) {
+  return data.x.map(x => `<span>${x}</span>`).join('');
+}
+
+function renderRecords() {
+  return records.map((record, index) => `<div class="record-item">
+    <div class="record-icon"></div>
+    <div class="record-copy">
+      <div class="record-name">${record.name}</div>
+      <div class="record-meta">2026-01-12 11:18&nbsp;&nbsp;|&nbsp;&nbsp;14min29s</div>
+    </div>
+    <div class="record-right">
+      <div class="progress"><span></span></div>
+      <div class="percent">85%</div>
+      ${record.mood ? '<div class="mood">😊</div>' : '<div></div>'}
+    </div>
+  </div>`).join('');
+}
+
+function phoneHTML(page) {
+  const data = viewData[page];
+  return `${statusBar()}
+    <div class="screen">
+      <div class="nav">
+        <button class="back" aria-label="Back"></button>
+        <div class="nav-title">Training Records</div>
+        <div></div>
+      </div>
+      <div class="period-tabs">
+        ${['week','month','year'].map(key => `<button class="period-tab${key === page ? ' active' : ''}" onclick="showPage('${key}')">${viewData[key].label}</button>`).join('')}
+      </div>
+      <section class="chart-card">
+        <div class="chart-head">
+          <div class="chart-arrow left"></div>
+          <div class="chart-title">${data.range}</div>
+          <div class="chart-arrow right${data.disabledRight ? ' disabled' : ''}"></div>
+        </div>
+        <div class="chart-area">
+          <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+          <div class="goal-line"></div>
+          <div class="axis-label axis-top">3h</div>
+          <div class="axis-label axis-bottom">0</div>
+          <div class="bars">${renderBars(data)}</div>
+          <div class="x-axis">${renderXAxis(data)}</div>
+        </div>
+        <div class="stats">
+          <div><div class="stat-value">12<span>Days</span></div><div class="stat-label">Persistence</div></div>
+          <div><div class="stat-value">8<span>Times</span></div><div class="stat-label">Training Sessions</div></div>
+          <div><div class="stat-value">34<span>H</span></div><div class="stat-label">Total Duration</div></div>
+        </div>
+      </section>
+      <section class="list-card">
+        <div class="filter-tabs">
+          <span class="filter-tab active">All</span>
+          <span>STIM</span>
+          <span>EMG Therapy</span>
+          <span>ETS</span>
+          <span>EMG Game</span>
+        </div>
+        ${renderRecords()}
+      </section>
+    </div>`;
+}
+
+function showPage(page) {
+  current = page;
+  document.getElementById('phone').innerHTML = phoneHTML(page);
+  document.querySelectorAll('.sidebar-item').forEach(item => item.classList.toggle('active', item.dataset.page === page));
+  const doc = viewData[page].doc;
+  document.getElementById('prd-path').textContent = doc.path;
+  document.getElementById('prd-content').innerHTML = doc.body;
+  const hash = '#/' + page;
+  if (location.hash !== hash) history.replaceState(null, '', hash);
+}
+
+function initFromHash() {
+  const key = location.hash.replace(/^#\/?/, '');
+  showPage(viewData[key] ? key : 'week');
+}
+
+window.addEventListener('hashchange', initFromHash);
+document.addEventListener('DOMContentLoaded', initFromHash);
+</script>
+</body>
+</html>
