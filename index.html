@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Records Image Demo</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #242326;
+  --muted: #8f8f96;
+  --rose: #f39499;
+  --rose-soft: #fdebed;
+  --panel: #ffffff;
+}
+body {
+  min-height: 100vh;
+  overflow: hidden;
+  background: #efefef;
+  color: var(--ink);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  display: flex;
+}
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background: var(--panel);
+  border-right: 1px solid #e5e5e5;
+  flex-shrink: 0;
+}
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+.sidebar-header h2 {
+  font-size: 15px;
+  font-weight: 750;
+}
+.sidebar-header p {
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+}
+.sidebar-list {
+  padding: 10px;
+}
+.sidebar-group-title {
+  padding: 10px 10px 6px;
+  color: #999;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+}
+.sidebar-item:hover { background: #f7f7f7; }
+.sidebar-item.active {
+  background: var(--rose-soft);
+  color: #b65a61;
+  font-weight: 650;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rose);
+  flex: 0 0 auto;
+}
+.phone-area {
+  flex: 0 0 430px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  border-radius: 40px;
+  overflow: hidden;
+  background: #fff7fa;
+  box-shadow: 0 22px 60px rgba(0,0,0,.16), 0 0 0 1px rgba(0,0,0,.04);
+  position: relative;
+}
+.shot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.missing-shot {
+  position: absolute;
+  inset: 0;
+  padding: 72px 28px;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: #fff7fa;
+  color: #555;
+}
+.missing-shot.show { display: flex; }
+.missing-shot h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+.missing-shot p {
+  color: #777;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.hotspot {
+  position: absolute;
+  z-index: 2;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+.hotspot:focus-visible {
+  outline: 2px solid rgba(243,148,153,.85);
+  outline-offset: -2px;
+}
+.hotspot[data-debug="true"] {
+  background: rgba(243,148,153,.18);
+  box-shadow: inset 0 0 0 1px rgba(243,148,153,.45);
+}
+.hotspot.back { left: 16px; top: 55px; width: 44px; height: 44px; border-radius: 50%; }
+.hotspot.week { left: 16px; top: 98px; width: 114px; height: 40px; }
+.hotspot.month { left: 130px; top: 98px; width: 115px; height: 40px; }
+.hotspot.year { left: 245px; top: 98px; width: 114px; height: 40px; }
+.hotspot.prev-range { left: 22px; top: 169px; width: 46px; height: 46px; border-radius: 50%; }
+.hotspot.next-range { right: 22px; top: 169px; width: 46px; height: 46px; border-radius: 50%; }
+.hotspot.filter-all { left: 31px; top: 504px; width: 43px; height: 38px; }
+.hotspot.filter-stim { left: 68px; top: 504px; width: 61px; height: 38px; }
+.hotspot.filter-emg { left: 120px; top: 504px; width: 109px; height: 38px; }
+.hotspot.filter-ets { left: 226px; top: 504px; width: 48px; height: 38px; }
+.hotspot.filter-game { left: 270px; top: 504px; width: 88px; height: 38px; }
+.prd-area {
+  flex: 1;
+  height: 100vh;
+  min-width: 320px;
+  background: var(--panel);
+  border-left: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+}
+.prd-header {
+  padding: 20px;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5e5;
+}
+.prd-header h3 {
+  font-size: 15px;
+  font-weight: 750;
+}
+.prd-path {
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+}
+.prd-content {
+  padding: 22px;
+  overflow-y: auto;
+  color: #3a3a3a;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.prd-content h4 {
+  margin: 18px 0 8px;
+  color: #222;
+  font-size: 14px;
+}
+.prd-content ul { padding-left: 18px; }
+.prd-content li { margin-bottom: 8px; }
+.prd-content code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #f5f5f5;
+  font-size: 12px;
+}
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  z-index: 4;
+  transform: translateX(-50%) translateY(8px);
+  max-width: 310px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  background: rgba(36,35,38,.82);
+  color: #fff;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+@media (max-width: 1100px) {
+  .prd-area { display: none; }
+  .phone-area { flex: 1; }
+}
+@media (max-width: 760px) {
+  body { display: block; overflow: auto; background: #fff7fa; }
+  .sidebar, .prd-area { display: none; }
+  .phone-area { padding: 0; display: block; }
+  .phone-frame {
+    width: 100vw;
+    height: min(100vh, calc(100vw * 812 / 375));
+    min-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Training Records Demo</h2>
+      <p>截图底图 · 独立交互热区</p>
+    </div>
+    <div class="sidebar-list">
+      <div class="sidebar-group-title">页面状态</div>
+      <div class="sidebar-item active" data-page="week" onclick="showPage('week')"><span class="dot"></span>Week 周视图</div>
+      <div class="sidebar-item" data-page="month" onclick="showPage('month')"><span class="dot"></span>Month 月视图</div>
+      <div class="sidebar-item" data-page="year" onclick="showPage('year')"><span class="dot"></span>Year 年视图</div>
+    </div>
+  </aside>
+
+  <main class="phone-area">
+    <section class="phone-frame" id="phone"></section>
+  </main>
+
+  <aside class="prd-area">
+    <div class="prd-header">
+      <h3 id="prd-title">说明</h3>
+      <div class="prd-path" id="prd-path">Training Records / Week</div>
+    </div>
+    <div class="prd-content" id="prd-content"></div>
+  </aside>
+
+<script>
+const viewData = {
+  week: {
+    label: 'Week',
+    img: 'assets/training-records-week.png',
+    path: 'Training Records / Week',
+    body: `
+      <h4>展示方式</h4>
+      <ul>
+        <li>手机预览直接使用你提供的 Week 截图作为完整底图。</li>
+        <li>Week / Month / Year、返回、图表左右箭头、分类 tab 均为独立绘制的透明热区按钮。</li>
+      </ul>
+      <h4>图片文件</h4>
+      <ul>
+        <li>请将 Week 原图放在 <code>assets/training-records-week.png</code>。</li>
+        <li>建议使用你发来的 750 × 1624 截图，页面会按 375 × 812 等比展示。</li>
+      </ul>`
+  },
+  month: {
+    label: 'Month',
+    img: 'assets/training-records-month.png',
+    path: 'Training Records / Month',
+    body: `
+      <h4>展示方式</h4>
+      <ul>
+        <li>手机预览直接使用你提供的 Month 截图作为完整底图。</li>
+        <li>点击分段控件会切换到对应截图，不再手工复刻图表和列表。</li>
+      </ul>
+      <h4>图片文件</h4>
+      <ul>
+        <li>请将 Month 原图放在 <code>assets/training-records-month.png</code>。</li>
+      </ul>`
+  },
+  year: {
+    label: 'Year',
+    img: 'assets/training-records-year.png',
+    path: 'Training Records / Year',
+    body: `
+      <h4>展示方式</h4>
+      <ul>
+        <li>手机预览直接使用你提供的 Year 截图作为完整底图。</li>
+        <li>透明热区保持独立，后续如果换图，只需要微调坐标，不需要重画页面。</li>
+      </ul>
+      <h4>图片文件</h4>
+      <ul>
+        <li>请将 Year 原图放在 <code>assets/training-records-year.png</code>。</li>
+      </ul>`
+  }
+};
+
+const filterLabels = {
+  'filter-all': 'All',
+  'filter-stim': 'STIM',
+  'filter-emg': 'EMG Therapy',
+  'filter-ets': 'ETS',
+  'filter-game': 'EMG Game'
+};
+
+let toastTimer;
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+}
+
+function hotspot(className, label, action) {
+  return `<button class="hotspot ${className}" aria-label="${label}" title="${label}" onclick="${action}"></button>`;
+}
+
+function phoneHTML(page) {
+  const data = viewData[page];
+  return `
+    <img class="shot" src="${data.img}" alt="${data.label} Training Records screenshot" draggable="false" onerror="this.style.display='none';document.getElementById('missing-shot').classList.add('show')">
+    <div class="missing-shot" id="missing-shot">
+      <h3>缺少截图文件</h3>
+      <p>请把你提供的 ${data.label} 截图保存为<br><code>${data.img}</code><br>然后刷新页面。</p>
+    </div>
+    ${hotspot('back', 'Back', "showToast('返回按钮热区')")}
+    ${hotspot('week', 'Week', "showPage('week')")}
+    ${hotspot('month', 'Month', "showPage('month')")}
+    ${hotspot('year', 'Year', "showPage('year')")}
+    ${hotspot('prev-range', 'Previous range', "showToast('上一周期热区')")}
+    ${hotspot('next-range', 'Next range', "showToast('下一周期热区')")}
+    ${Object.entries(filterLabels).map(([className, label]) => hotspot(className, label, `showToast('${label} 分类热区')`)).join('')}
+    <div class="toast" id="toast"></div>`;
+}
+
+function showPage(page) {
+  document.getElementById('phone').innerHTML = phoneHTML(page);
+  document.querySelectorAll('.sidebar-item').forEach(item => item.classList.toggle('active', item.dataset.page === page));
+  const data = viewData[page];
+  document.getElementById('prd-path').textContent = data.path;
+  document.getElementById('prd-content').innerHTML = data.body;
+  const hash = '#/' + page;
+  if (location.hash !== hash) history.replaceState(null, '', hash);
+}
+
+function initFromHash() {
+  const key = location.hash.replace(/^#\/?/, '');
+  showPage(viewData[key] ? key : 'week');
+}
+
+window.addEventListener('hashchange', initFromHash);
+document.addEventListener('DOMContentLoaded', initFromHash);
+</script>
+</body>
+</html>
